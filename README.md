@@ -1,2 +1,2 @@
 # miniJam2
-Repository for the second minijam in college
+integrantes: Giovani Simões, Livia Rosembach Oliveira, Lucas Brisch Zanlorenzi, Sarah Maneira
