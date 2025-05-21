@@ -1,5 +1,6 @@
 let gameState = 'mainMenu'; // 'mainMenu', 'game', 'gameHistory'
 let bubbles = [];
+let bombs = []; // Array para armazenar bombas
 let score = 0;
 let lastScore = 0;
 let popSound;
@@ -61,7 +62,11 @@ function drawGame() {
   textAlign(CENTER, CENTER); 
 
   if (random(1) < 0.02) { 
-    bubbles.push(new Bubble());
+    if (random(1) < 0.2) { // 10% de chance de criar uma bomba
+      bombs.push(new Bomb());
+    } else {
+      bubbles.push(new Bubble());
+    }
   }
 
   // Update and display bubbles
@@ -70,6 +75,15 @@ function drawGame() {
     bubbles[i].display();
     if (bubbles[i].isOffScreen()) {
       bubbles.splice(i, 1);
+    }
+  }
+
+  // Update and display bombs
+  for (let i = bombs.length - 1; i >= 0; i--) {
+    bombs[i].update();
+    bombs[i].display();
+    if (bombs[i].isOffScreen()) {
+      bombs.splice(i, 1);
     }
   }
 }
@@ -96,6 +110,7 @@ function mousePressed() {
       lastScore = score; 
       score = 0; 
       bubbles = []; 
+      bombs = []; // Limpa as bombas
       gameState = 'mainMenu';
       return; 
     }
@@ -107,6 +122,13 @@ function mousePressed() {
         // popSound.play(); // Uncomment when you have a sound file
       }
     }
+
+    for (let i = bombs.length - 1; i >= 0; i--) {
+      if (bombs[i].isClicked(mouseX, mouseY)) {
+        gameOver(); // Chama a função de game over
+        return;
+      }
+    }
   } else if (gameState === 'gameHistory') {
     if (isButtonClicked(backButton)) {
       gameState = 'mainMenu';
@@ -116,6 +138,7 @@ function mousePressed() {
 
 function startGame() {
   bubbles = [];
+  bombs = [];
   lastScore = score;
   score = 0;
   gameState = 'game';
@@ -124,6 +147,15 @@ function startGame() {
 function isButtonClicked(button) {
   return mouseX > button.x && mouseX < button.x + button.w &&
          mouseY > button.y && mouseY < button.y + button.h;
+}
+
+function gameOver() {
+  alert('Game Over! Você clicou em uma bomba!');
+  lastScore = score;
+  score = 0;
+  bubbles = [];
+  bombs = [];
+  gameState = 'mainMenu';
 }
 
 class Bubble {
@@ -146,6 +178,42 @@ class Bubble {
     strokeWeight(this.strokeThickness);
     fill(this.color);
     ellipse(this.x, this.y, this.r * 2);
+  }
+
+  isOffScreen() {
+    return this.y < -this.r;
+  }
+
+  isClicked(px, py) {
+    let d = dist(px, py, this.x, this.y);
+    return d < this.r;
+  }
+}
+
+class Bomb {
+  constructor() {
+    this.x = random(width);
+    this.y = height + random(50, 100);
+    this.r = random(20, 50);
+    this.speed = random(3, 5);
+    this.color = color(255, 0, 0, 150); // Vermelho com transparência
+    this.strokeColor = color(0, 0, 0, 255); // Contorno preto
+    this.strokeThickness = 2;
+  }
+
+  update() {
+    this.y -= this.speed;
+  }
+
+  display() {
+    stroke(this.strokeColor);
+    strokeWeight(this.strokeThickness);
+    fill(this.color);
+    ellipse(this.x, this.y, this.r * 2);
+    fill(255);
+    noStroke();
+    textAlign(CENTER, CENTER);
+    text('💣', this.x, this.y); // Ícone de bomba
   }
 
   isOffScreen() {
