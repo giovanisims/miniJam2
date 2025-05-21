@@ -4,11 +4,11 @@ let score = 0;
 let lastScore = 0;
 let popSound;
 
-// Buttons (simple rectangles for now)
+// Buttons 
 let startButton;
 let historyButton;
 let backButton;
-
+let gameBackButton; 
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -19,6 +19,7 @@ function setup() {
   startButton = { x: width / 2 - 100, y: height / 2 - 50, w: 200, h: 50, label: 'Start Game' };
   historyButton = { x: width / 2 - 100, y: height / 2 + 20, w: 200, h: 50, label: 'Game History' };
   backButton = { x: width / 2 - 100, y: height / 2 + 90, w: 200, h: 50, label: 'Back' };
+  gameBackButton = { x: width - 160, y: height - 60, w: 150, h: 40, label: 'Menu' }; // Positioned at bottom right
 }
 
 function draw() {
@@ -48,10 +49,18 @@ function drawGame() {
   fill(0);
   textAlign(LEFT, TOP);
   text('Score: ' + score, 10, 10);
-  textAlign(CENTER, CENTER); // Reset alignment
 
-  // Spawn new bubbles randomly
-  if (random(1) < 0.02) { // Adjust spawn rate
+  // Draw "Back to Menu" button
+  fill(200, 0, 0); 
+  rect(gameBackButton.x, gameBackButton.y, gameBackButton.w, gameBackButton.h);
+  fill(255);
+  textSize(24); 
+  textAlign(CENTER, CENTER);
+  text(gameBackButton.label, gameBackButton.x + gameBackButton.w / 2, gameBackButton.y + gameBackButton.h / 2);
+  textSize(32); 
+  textAlign(CENTER, CENTER); 
+
+  if (random(1) < 0.02) { 
     bubbles.push(new Bubble());
   }
 
@@ -83,6 +92,14 @@ function mousePressed() {
       gameState = 'gameHistory';
     }
   } else if (gameState === 'game') {
+    if (isButtonClicked(gameBackButton)) {
+      lastScore = score; 
+      score = 0; 
+      bubbles = []; 
+      gameState = 'mainMenu';
+      return; 
+    }
+
     for (let i = bubbles.length - 1; i >= 0; i--) {
       if (bubbles[i].isClicked(mouseX, mouseY)) {
         bubbles.splice(i, 1);
@@ -99,7 +116,7 @@ function mousePressed() {
 
 function startGame() {
   bubbles = [];
-  lastScore = score; // Save score from previous game
+  lastScore = score;
   score = 0;
   gameState = 'game';
 }
@@ -112,10 +129,12 @@ function isButtonClicked(button) {
 class Bubble {
   constructor() {
     this.x = random(width);
-    this.y = height + random(50, 100); // Start below the screen
+    this.y = height + random(50, 100);
     this.r = random(20, 50);
-    this.speed = random(1, 3);
-    this.color = color(random(100, 255), random(100, 255), 255, 150); // Translucent colors
+    this.speed = random(3, 5);
+    this.color = color(random(100, 255), random(100, 255), 255, 150); 
+    this.strokeColor = color(0, 0, 0, 255); // Black stroke, slightly transparent
+    this.strokeThickness = 1; 
   }
 
   update() {
@@ -123,8 +142,9 @@ class Bubble {
   }
 
   display() {
+    stroke(this.strokeColor);
+    strokeWeight(this.strokeThickness);
     fill(this.color);
-    noStroke();
     ellipse(this.x, this.y, this.r * 2);
   }
 
@@ -140,8 +160,8 @@ class Bubble {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-   // Re-calculate button positions if needed, or use relative positioning
   startButton = { x: width / 2 - 100, y: height / 2 - 50, w: 200, h: 50, label: 'Start Game' };
   historyButton = { x: width / 2 - 100, y: height / 2 + 20, w: 200, h: 50, label: 'Game History' };
   backButton = { x: width / 2 - 100, y: height / 2 + 90, w: 200, h: 50, label: 'Back' };
+  gameBackButton = { x: width - 160, y: height - 60, w: 150, h: 40, label: 'Menu' }; 
 }
